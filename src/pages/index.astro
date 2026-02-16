@@ -20,7 +20,9 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 ---
 
-<Layout description="Personal blog about software, systems, and what I am learning.">
+<Layout
+  description="Personal blog about software, systems, and what I am learning."
+>
   <StructuredData type="WebSite" data={{}} />
   <StructuredData type="Person" data={{}} />
   <Header />
@@ -28,15 +30,17 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
     <section id="hero" class="pt-6 pb-4">
       <div class="flex flex-col sm:flex-row items-start gap-4">
         <a href="/about" class="block mx-auto sm:mx-0 group">
-          <img 
-            src="/anders-avatar.jpeg" 
-            alt={SITE.author} 
+          <img
+            src="/anders-avatar.jpeg"
+            alt={SITE.author}
             class="w-40 h-40 rounded-full object-cover shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl"
           />
         </a>
         <div class="flex-1 text-center sm:text-left">
           <div class="flex items-center gap-2 justify-center sm:justify-start">
-            <h1 class="my-2 inline-block text-2xl font-bold sm:my-4 sm:text-3xl">
+            <h1
+              class="my-2 inline-block text-2xl font-bold sm:my-4 sm:text-3xl"
+            >
               Hi, I am {SITE.author}.
             </h1>
             <a
@@ -55,8 +59,9 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
             </a>
           </div>
           <p>
-            Personal notes on engineering, tools, and shipping.<br />
-            Building in public, one post at a time.
+            Personal blog about things I am doing, building or learning about.<br
+            />
+            Just exploring.
           </p>
           {
             // only display if at least one social link is enabled
@@ -94,7 +99,9 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
           <ul>
             {recentPosts.map(
               (data, index) =>
-                index < SITE.postPerIndex && <Card variant="h3" {...data} showImage={false} />,
+                index < SITE.postPerIndex && (
+                  <Card variant="h3" {...data} showImage={false} />
+                ),
             )}
           </ul>
         </section>

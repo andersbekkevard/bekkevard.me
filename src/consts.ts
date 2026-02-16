@@ -32,7 +32,7 @@ interface Site {
 // Site configuration
 export const SITE: Site = {
   website: "https://bekkevard.me/",
-  author: "Anders Bekkevard",
+  author: "Anders",
   profile: "https://bekkevard.me/about",
   desc: "Personal blog about software, systems, and what I am learning.",
   title: "Anders Bekkevard",

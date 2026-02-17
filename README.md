@@ -1,10 +1,8 @@
-# Personal Blog Starter (Astro)
+# Personal Blog
 
-This repository is a personal blog starter built with [Astro](https://astro.build), ready for static hosting.
+This is the source code for my website, [bekkevard.me](bekkevard.me).
+There I write articles on things I learn and am curious about.
 
-## Purpose
-
-This project is configured as a clean, personal blog template: write posts in Markdown/MDX, keep content under version control, and publish with a static build.
 
 ## Project Structure
 
@@ -71,16 +69,3 @@ Defaults:
 - `year`: current year
 - `slug`: generated from title (or `new-post` if title is empty)
 - `extension`: `md` (can be changed to `mdx`)
-
-## License
-
-This repository uses dual licensing:
-
-- **Documentation & Blog Posts**: Licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)
-- **Code & Code Snippets**: Licensed under the [MIT License](LICENSE)
-
-See the [LICENSE](LICENSE) file for full details.
-
-## Project Guide
-
-For a complete walkthrough (architecture, customization points, and workflow), see `docs/PROJECT_GUIDE.md`.

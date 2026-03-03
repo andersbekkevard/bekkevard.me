@@ -3,7 +3,7 @@ title: "Focus in the era of distracting agents"
 description: "Working with AI means context switch overload. Focus gets fragmented. How should we deal with this in the future?"
 pubDatetime: "2026-03-3T22:06:44+01:00"
 author: "Anders Bekkevard"
-tags: ["AI"]
+tags: ["AI", "Learning", "Focus"]
 ---
 
 I want to summarize what I learn while building AI systems. I want to force myself to reflect on my lessons, and crystalize the knowledge.

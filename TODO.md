@@ -1,0 +1,6 @@
+- [ ] Change dark mode colors to the example from color_inspo.png https://notnotp.com/notes/use-protocols-not-services/
+- [ ] Setup autotranslate, and write blogposts in Norwegian and English
+- [ ] More photos
+- [ ] Finalize the non-blog text 
+- [ ] Write first blogpost :)
+- [ ] Portfolio (?). Maybe better to write blogposts on projects, and let github be the portfolio

@@ -122,8 +122,8 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
     >
       {title}
     </h1>
-    <div class="flex items-center justify-between gap-4 mt-2 mb-6">
-      <div class="flex items-center gap-3">
+    <div class="mt-2 mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex flex-wrap items-center gap-3">
         <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
         {
           readingTime && (
@@ -165,7 +165,7 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
 
       <button
         id="back-to-top"
-        class="focus-outline py-1 whitespace-nowrap hover:opacity-75"
+        class="focus-outline min-h-11 whitespace-nowrap rounded-sm px-3 py-2 hover:opacity-75"
       >
         <IconChevronLeft class="inline-block rotate-90" />
         <span>Back to Top</span>
@@ -185,11 +185,11 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
         prevPost && (
           <a
             href={`/posts/${prevPost.slug}`}
-            class="flex gap-2 hover:opacity-75 items-start"
+            class="flex items-start gap-2 hover:opacity-75"
             id="prev-post-link"
           >
             <IconChevronLeft class="inline-block flex-shrink-0 mt-0.5" />
-            <div class="min-w-0">
+            <div class="min-w-0 break-words">
               <span class="block text-sm text-foreground/70">Previous Post</span>
               <div class="text-accent/85">{prevPost.title}</div>
             </div>
@@ -200,10 +200,10 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
         nextPost && (
           <a
             href={`/posts/${nextPost.slug}`}
-            class="flex gap-2 hover:opacity-75 items-start justify-end text-right ml-auto"
+            class="ml-auto flex items-start justify-end gap-2 text-right hover:opacity-75"
             id="next-post-link"
           >
-            <div class="min-w-0">
+            <div class="min-w-0 break-words">
               <span class="block text-sm text-foreground/70">Next Post</span>
               <div class="text-accent/85">{nextPost.title}</div>
             </div>

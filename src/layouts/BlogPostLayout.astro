@@ -34,7 +34,7 @@ const canonicalURL = new URL(canonicalPath, Astro.site).toString();
         <a
           id="back-button"
           href="/"
-          class="group inline-block hover:text-accent focus-outline mt-8 mb-2 flex hover:text-foreground/75"
+          class="group mt-8 mb-2 inline-flex min-h-11 items-center rounded-sm px-2 py-2 hover:text-accent focus-outline hover:text-foreground/75"
         >
           <svg
             width="24"
@@ -65,8 +65,8 @@ const canonicalURL = new URL(canonicalPath, Astro.site).toString();
     <h1 class="inline-block text-2xl font-bold text-accent sm:text-3xl">
       {title}
     </h1>
-    <div class="flex items-center justify-between gap-4">
-      <div class="flex items-end space-x-2 opacity-80 my-2">
+    <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="my-2 flex flex-wrap items-end gap-2 opacity-80">
         <svg
           width="24"
           height="24"
@@ -123,7 +123,7 @@ const canonicalURL = new URL(canonicalPath, Astro.site).toString();
             href={`${SITE.editPost.url}src/content/blog/${slug}.md`}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-sm text-foreground/60 hover:text-accent inline-flex items-center gap-1"
+            class="inline-flex min-h-11 items-center gap-1 rounded-sm px-2 py-2 text-sm text-foreground/60 hover:text-accent"
           >
             <svg
               width="16"

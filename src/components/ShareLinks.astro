@@ -33,11 +33,11 @@ const iconMap = {
         return (
           <LinkButton
             href={`${social.href + URL}`}
-            class="p-3 sm:p-2 hover:rotate-6"
+            class="p-3 sm:p-2"
             title={social.linkTitle}
           >
             {IconComponent && (
-              <IconComponent class="inline-block size-8 sm:size-6 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent" />
+              <IconComponent class="inline-block size-6 sm:size-5 fill-transparent stroke-current opacity-80 group-hover:opacity-100" />
             )}
             <span class="sr-only">{social.linkTitle}</span>
           </LinkButton>

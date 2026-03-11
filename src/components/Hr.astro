@@ -2,11 +2,19 @@
 export interface Props {
   noPadding?: boolean;
   ariaHidden?: boolean;
+  variant?: "thin" | "thick" | "double" | "accent";
 }
 
-const { noPadding = false, ariaHidden = true } = Astro.props;
+const { noPadding = false, ariaHidden = true, variant = "thin" } = Astro.props;
+
+const ruleClass = {
+  thin: "rule-thin",
+  thick: "rule-thick",
+  double: "rule-double",
+  accent: "rule-accent",
+}[variant];
 ---
 
-<div class={`max-w-3xl mx-auto ${noPadding ? "px-0" : "px-4"}`}>
-  <hr class="border-border" aria-hidden={ariaHidden} />
+<div class={`max-w-4xl mx-auto ${noPadding ? "px-0" : "px-4"}`}>
+  <div class={ruleClass} role="separator" aria-hidden={ariaHidden}></div>
 </div>

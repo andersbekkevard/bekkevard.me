@@ -1,5 +1,4 @@
 ---
-import Hr from "./Hr.astro";
 import Socials from "./Socials.astro";
 import { SITE } from "@/config";
 
@@ -11,16 +10,17 @@ const { noMarginTop = false } = Astro.props;
 const sourceRepo = SITE.editPost.url.replace(/\/edit\/main\/?$/, "");
 ---
 
-<footer class:list={["w-full", { "mt-auto": !noMarginTop }]}>
-  <Hr noPadding />
-  <div
-    class="flex flex-col items-center justify-between py-6 sm:flex-row-reverse sm:py-4"
-  >
-    <Socials centered />
-    <div class="my-2 flex flex-col items-center text-center sm:flex-row">
-      <a href={sourceRepo} target="_blank" rel="noopener noreferrer" class="hover:text-accent">
-        Source available · Content CC BY 4.0 · Code MIT
-      </a>
+<footer class:list={["w-full mx-auto max-w-4xl px-4", { "mt-auto": !noMarginTop }]}>
+  <div class="rule-double"></div>
+  <div class="py-6 flex flex-col items-center gap-3">
+    <div class="flex items-center gap-4">
+      <Socials centered />
     </div>
+    <p class="font-sans-ui text-xs text-meta text-center tracking-wide">
+      <a href={sourceRepo} target="_blank" rel="noopener noreferrer" class="hover:text-accent">
+        Source available
+      </a>
+      &nbsp;·&nbsp; Content CC BY 4.0 &nbsp;·&nbsp; Code MIT
+    </p>
   </div>
 </footer>

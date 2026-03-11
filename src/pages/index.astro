@@ -1,23 +1,23 @@
 ---
 import { getCollection } from "astro:content";
-import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
-import IconRss from "@/assets/icons/IconRss.svg";
 import Card from "@/components/Card.astro";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
-import Hr from "@/components/Hr.astro";
-import LinkButton from "@/components/LinkButton.astro";
-import Socials from "@/components/Socials.astro";
 import StructuredData from "@/components/StructuredData.astro";
-import { SITE, SOCIALS } from "@/config";
+import { SITE } from "@/config";
 import Layout from "@/layouts/Layout.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 
 const posts = await getCollection("blog");
-
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+
+// Lead article: first featured, or first recent
+const leadPost = featuredPosts[0] || recentPosts[0];
+const remainingFeatured = featuredPosts.slice(leadPost === featuredPosts[0] ? 1 : 0);
+const remainingRecent = recentPosts.slice(leadPost === recentPosts[0] ? 1 : 0);
+const allRemaining = [...remainingFeatured, ...remainingRecent];
 ---
 
 <Layout
@@ -27,93 +27,62 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
   <StructuredData type="Person" data={{}} />
   <Header />
   <main id="main-content" data-layout="index">
-    <section id="hero" class="pt-6 pb-4">
-      <div class="flex flex-col sm:flex-row items-start gap-4">
-        <a href="/about" class="block mx-auto sm:mx-0 group">
-          <img
-            src="/anders-avatar.jpeg"
-            alt={SITE.author}
-            class="w-40 h-40 rounded-full object-cover shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl"
-          />
-        </a>
-        <div class="flex-1 text-center sm:text-left">
-          <div class="flex items-center gap-2 justify-center sm:justify-start">
-            <h1
-              class="my-2 inline-block text-2xl font-bold sm:my-4 sm:text-3xl"
-            >
-              Hi, I am {SITE.author}.
-            </h1>
-            <a
-              target="_blank"
-              href="/rss.xml"
-              class="inline-block"
-              aria-label="rss feed"
-              title="RSS Feed"
-            >
-              <IconRss
-                width={20}
-                height={20}
-                class="scale-125 stroke-accent stroke-3"
-              />
-              <span class="sr-only">RSS Feed</span>
-            </a>
-          </div>
-          <p>
-            Personal blog about things I am doing, building or learning about.<br
-            />
-            Just exploring.
-          </p>
-          {
-            // only display if at least one social link is enabled
-            SOCIALS.filter((social) => social.active).length > 0 && (
-              <div class="mt-4 flex flex-row items-center justify-center sm:justify-start">
-                <Socials />
-              </div>
-            )
-          }
+    <section class="mx-auto max-w-4xl px-4 pt-8 pb-6">
+      <!-- Tagline -->
+      <p class="font-serif text-base italic text-meta text-center mb-6">
+        Personal essays on software, systems, and learning.
+      </p>
+
+      <div class="rule-thin mb-8"></div>
+
+      {leadPost && (
+        <!-- Lead article -->
+        <div class="mb-8">
+          <Card {...leadPost} variant="h2" size="lead" showImage={false} />
         </div>
+      )}
+
+      {allRemaining.length > 0 && (
+        <>
+          <div class="rule-thin mb-6"></div>
+
+          <!-- Secondary articles in newspaper grid -->
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-6">
+            {allRemaining.map((post, i) => (
+              <>
+                {/* On mobile, add rule between items */}
+                {i > 0 && (
+                  <div class="rule-thin sm:hidden"></div>
+                )}
+                <div class:list={[
+                  /* Add left border on desktop for right column items */
+                  i % 2 === 1 && "sm:border-l sm:border-border sm:pl-8",
+                ]}>
+                  <Card {...post} variant="h3" size="standard" showImage={false} />
+                </div>
+              </>
+            ))}
+          </div>
+        </>
+      )}
+
+      {sortedPosts.length === 0 && (
+        <p class="text-center text-meta py-12 font-serif italic">
+          No essays published yet.
+        </p>
+      )}
+
+      <!-- All posts link -->
+      <div class="rule-thin mt-8 mb-6"></div>
+      <div class="text-center">
+        <a
+          href="/posts/"
+          class="font-sans-ui text-sm font-semibold uppercase tracking-widest text-accent hover:text-foreground transition-colors"
+        >
+          View all essays &rarr;
+        </a>
       </div>
     </section>
-
-    <Hr />
-
-    {
-      featuredPosts.length > 0 && (
-        <>
-          <section id="featured" class="pt-12 pb-6">
-            <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
-            <ul>
-              {featuredPosts.map((data) => (
-                <Card variant="h3" {...data} showImage={false} />
-              ))}
-            </ul>
-          </section>
-          {recentPosts.length > 0 && <Hr />}
-        </>
-      )
-    }
-
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <ul>
-            {recentPosts.map(
-              (data, index) =>
-                index < SITE.postPerIndex && (
-                  <Card variant="h3" {...data} showImage={false} />
-                ),
-            )}
-          </ul>
-        </section>
-      )
-    }
-
-    <div class="my-8 text-center">
-      <LinkButton href="/posts/">
-        All Posts
-        <IconArrowRight class="inline-block" />
-      </LinkButton>
-    </div>
   </main>
   <Footer />
 </Layout>

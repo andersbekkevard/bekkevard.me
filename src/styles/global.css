@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* Font definitions */
+/* Font definitions - Atkinson for UI fallback */
 @font-face {
   font-family: "Atkinson";
   src: url("/fonts/atkinson-regular.woff") format("woff");
@@ -20,21 +20,26 @@
   font-display: swap;
 }
 
+/* ── Morgenbladet-inspired palette ── */
 :root,
 html[data-theme="light"] {
-  --background: #fdfdfd;
-  --foreground: #282728;
-  --accent: #006cac;
-  --muted: #e6e6e6;
-  --border: #ece9e9;
+  --background: #ffffff;
+  --foreground: #181818;
+  --accent: #990101;
+  --muted: #f0ebe5;
+  --border: #c8c2ba;
+  --meta: #595959;
+  --cream: #f7f3ee;
 }
 
 html[data-theme="dark"] {
-  --background: #212737;
-  --foreground: #eaedf3;
-  --accent: #ff6b01;
-  --muted: #343f60bf;
-  --border: #ab4b08;
+  --background: #1a1a18;
+  --foreground: #e8e4de;
+  --accent: #c44040;
+  --muted: #2a2724;
+  --border: #423d38;
+  --meta: #a09890;
+  --cream: #222018;
 }
 
 @theme {
@@ -44,6 +49,8 @@ html[data-theme="dark"] {
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-meta: var(--meta);
+  --color-cream: var(--cream);
 }
 
 @layer base {
@@ -52,47 +59,40 @@ html[data-theme="dark"] {
     scrollbar-width: auto;
     scrollbar-color: var(--color-muted) transparent;
   }
-  
-  /* View Transitions API for smooth theme switching (Safari 18+, Chrome 111+) */
+
+  /* View Transitions API for smooth theme switching */
   :root {
     view-transition-name: root;
   }
-  
-  /* Apply to html element as well for better compatibility */
   html {
     view-transition-name: root;
   }
-  
-  /* Ensure smooth transition between light and dark themes */
   ::view-transition-old(root),
   ::view-transition-new(root) {
-    animation-duration: 0.25s;
+    animation-duration: 0.2s;
   }
-  
-  /* Customize the transition style */
   ::view-transition-old(root) {
-    animation: fade-out 0.25s ease-out;
+    animation: fade-out 0.2s ease-out;
   }
-  
   ::view-transition-new(root) {
-    animation: fade-in 0.25s ease-out;
+    animation: fade-in 0.2s ease-out;
   }
-  
   @keyframes fade-out {
     from { opacity: 1; }
     to { opacity: 0; }
   }
-  
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  
+
   html {
     @apply overflow-y-scroll scroll-smooth;
   }
   body {
-    @apply flex min-h-svh flex-col bg-background font-mono text-foreground selection:bg-accent/75 selection:text-background;
+    @apply flex min-h-svh flex-col bg-background text-foreground selection:bg-accent/20 selection:text-foreground;
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1.6;
     overflow-x: clip;
   }
   a,
@@ -105,7 +105,7 @@ html[data-theme="dark"] {
   }
   section,
   footer {
-    @apply mx-auto max-w-3xl px-4;
+    @apply mx-auto w-full max-w-4xl px-4;
   }
 
   :where(img, svg, video, canvas, iframe) {
@@ -118,6 +118,50 @@ html[data-theme="dark"] {
   }
 }
 
+/* ── Newspaper typography helpers ── */
+
+.font-headline {
+  font-family: "Barlow Condensed", "Arial Narrow", "Helvetica Neue Condensed", sans-serif;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.font-sans-ui {
+  font-family: "Barlow", "Atkinson", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.font-serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* Section kicker / label */
+.section-label {
+  font-family: "Barlow", "Atkinson", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Newspaper rules */
+.rule-thin {
+  border-top: 1px solid var(--border);
+}
+.rule-thick {
+  border-top: 2px solid var(--foreground);
+}
+.rule-double {
+  border-top: 3px double var(--foreground);
+}
+.rule-accent {
+  border-top: 2px solid var(--accent);
+}
+
+/* Active navigation */
 .active-nav {
-  @apply underline decoration-wavy decoration-2 underline-offset-4;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
 }

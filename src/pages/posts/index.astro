@@ -10,26 +10,25 @@ import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 
 const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 ---
 
-<Layout title={`Posts | ${SITE.title}`} description="Archive of all blog posts.">
+<Layout title={`Essays | ${SITE.title}`} description="Archive of all essays.">
   <Header />
-  <main id="main-content" class="mx-auto w-full max-w-3xl px-4 pb-4">
-    <h1 class="text-2xl font-semibold sm:text-3xl mt-8">All Posts</h1>
-    <p class="mt-2 mb-6 italic">Browse all blog posts by year and month</p>
+  <main id="main-content" class="mx-auto w-full max-w-4xl px-4 pb-8">
+    <div class="pt-8 pb-4 text-center">
+      <h1 class="font-headline text-3xl sm:text-4xl text-foreground uppercase tracking-tight">
+        All Essays
+      </h1>
+      <p class="mt-2 font-serif text-base italic text-meta">
+        Browse the archive by year and month
+      </p>
+    </div>
+
+    <div class="rule-thick mb-8"></div>
+
     {
       Object.entries(
         getPostsByGroupCondition(posts, (post) => {
@@ -38,12 +37,18 @@ const months = [
         }),
       )
         .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
-        .map(([year, yearGroup]) => (
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-6 border-b border-accent pb-2">
-              {year}
-              <sup class="text-sm ml-1">{yearGroup.length}</sup>
-            </h2>
+        .map(([year, yearGroup], yearIndex) => (
+          <div class="mb-10">
+            {yearIndex > 0 && <div class="rule-thin mb-8"></div>}
+            <div class="flex items-baseline gap-3 mb-6">
+              <h2 class="font-headline text-2xl sm:text-3xl text-foreground">
+                {year}
+              </h2>
+              <span class="font-sans-ui text-xs font-semibold uppercase tracking-widest text-meta">
+                {yearGroup.length} {yearGroup.length === 1 ? "essay" : "essays"}
+              </span>
+            </div>
+
             {Object.entries(
               getPostsByGroupCondition(yearGroup, (post) => {
                 const pubDate = post.data.pubDatetime || new Date();
@@ -52,12 +57,11 @@ const months = [
             )
               .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
               .map(([month, monthGroup]) => (
-                <div class="mt-8">
-                  <h3 class="text-xl font-bold mb-4">
+                <div class="mb-8 sm:ml-6">
+                  <h3 class="font-sans-ui text-xs font-semibold uppercase tracking-widest text-accent mb-4">
                     {months[Number(month) - 1]}
-                    <sup class="text-sm ml-1">{monthGroup.length}</sup>
                   </h3>
-                  <ul>
+                  <div class="space-y-5">
                     {monthGroup
                       .sort((a, b) => {
                         const aDate = a.data.pubDatetime || new Date();
@@ -67,10 +71,13 @@ const months = [
                           Math.floor(new Date(aDate).getTime() / 1000)
                         );
                       })
-                      .map((data) => (
-                        <Card {...data} />
+                      .map((post, i) => (
+                        <>
+                          {i > 0 && <div class="rule-thin"></div>}
+                          <Card {...post} size="standard" showImage={false} />
+                        </>
                       ))}
-                  </ul>
+                  </div>
                 </div>
               ))}
           </div>

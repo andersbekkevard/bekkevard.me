@@ -2,7 +2,33 @@
 
 @layer base {
   .prose {
-    @apply prose-headings:!mb-3 prose-headings:!text-foreground prose-h3:italic prose-p:!text-foreground prose-a:!text-foreground prose-a:!decoration-dashed prose-a:underline-offset-8 hover:prose-a:text-accent prose-blockquote:!border-l-accent/50 prose-blockquote:opacity-80 prose-figcaption:!text-foreground prose-figcaption:opacity-70 prose-strong:!text-foreground prose-code:rounded prose-code:bg-muted/75 prose-code:p-1 prose-code:!text-foreground prose-code:before:!content-none prose-code:after:!content-none prose-ol:!text-foreground prose-ul:overflow-x-clip prose-ul:!text-foreground prose-li:marker:!text-accent prose-table:text-foreground prose-th:border prose-th:border-border prose-td:border prose-td:border-border prose-img:mx-auto prose-img:!my-2 prose-img:border-2 prose-img:border-border prose-hr:!border-border;
+    @apply prose-headings:!mb-3 prose-headings:!text-foreground prose-p:!text-foreground prose-a:!text-foreground prose-a:!decoration-solid prose-a:!decoration-accent/40 prose-a:underline-offset-4 hover:prose-a:!text-accent hover:prose-a:!decoration-accent prose-blockquote:!border-l-accent/50 prose-blockquote:opacity-80 prose-figcaption:!text-foreground prose-figcaption:opacity-70 prose-strong:!text-foreground prose-code:rounded prose-code:bg-muted/75 prose-code:p-1 prose-code:!text-foreground prose-code:before:!content-none prose-code:after:!content-none prose-ol:!text-foreground prose-ul:overflow-x-clip prose-ul:!text-foreground prose-li:marker:!text-accent prose-table:text-foreground prose-th:border prose-th:border-border prose-td:border prose-td:border-border prose-img:mx-auto prose-img:!my-2 prose-img:border prose-img:border-border prose-hr:!border-border;
+  }
+  .prose {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--foreground);
+  }
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    font-style: normal;
+  }
+  .prose h2 {
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .prose h3 {
+    font-size: 1.25rem;
+    margin-top: 2rem;
   }
   .prose a {
     @apply break-words hover:!text-accent;
@@ -36,7 +62,6 @@
   }
 
   .prose table code {
-    /* add line breaks whenever necessary for codes under table */
     @apply break-all sm:break-normal;
   }
 
@@ -49,18 +74,16 @@
   html[data-theme="light"] pre:has(code) span,
   :root pre:has(code),
   :root pre:has(code) span {
-    /* Darken comment colors by ~30% total for better contrast */
     --shiki-color-comment: #495057;
     --shiki-token-comment: #495057;
   }
 
-  /* Override inline styles for comments in light mode */
   html[data-theme="light"] pre code span[style*="color:#6C757D"],
   :root pre code span[style*="color:#6C757D"] {
     color: #495057 !important;
   }
 
-  /* Apply Dark Theme (if multi-theme specified) */
+  /* Apply Dark Theme */
   html[data-theme="dark"] pre:has(code),
   html[data-theme="dark"] pre:has(code) span {
     color: var(--shiki-dark) !important;

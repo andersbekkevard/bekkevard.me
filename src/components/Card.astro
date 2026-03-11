@@ -4,62 +4,86 @@ import type { CollectionEntry } from "astro:content";
 import { getPath } from "@/utils/getPath";
 import { calculateReadingTime } from "@/utils/readingTime";
 import { slugifyStr } from "@/utils/slugify";
-import Datetime from "./Datetime.astro";
+import dayjs from "dayjs";
 
 export interface Props extends CollectionEntry<"blog"> {
   variant?: "h2" | "h3";
   showImage?: boolean;
+  size?: "lead" | "standard" | "compact";
 }
 
-const { variant = "h2", data, id, filePath, body, showImage = true } = Astro.props;
+const {
+  variant = "h2",
+  data,
+  id,
+  filePath,
+  body,
+  showImage = true,
+  size = "standard",
+} = Astro.props;
 
-const { title, description, pubDatetime, modDatetime, timezone, heroImage } = data;
+const { title, description, pubDatetime, modDatetime, timezone, heroImage, tags } = data;
 const readingTime = calculateReadingTime(body ?? "");
-
-const headerProps = {
-  style: { viewTransitionName: slugifyStr(title) },
-  class: "text-lg font-medium decoration-dashed hover:underline",
-};
+const date = dayjs(pubDatetime).format("D MMMM YYYY");
+const primaryTag = tags?.[0];
 ---
 
-<li class="my-8">
-  <div>
-    <a
-      href={getPath(id, filePath)}
-      class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
-    >
-      {
-        variant === "h2" ? (
-          <h2 {...headerProps}>{title}</h2>
-        ) : (
-          <h3 {...headerProps}>{title}</h3>
-        )
-      }
-    </a>
-    <div class="mb-3 flex flex-wrap items-center gap-2 sm:gap-3">
-      <Datetime {pubDatetime} {modDatetime} {timezone} />
-      <span class="text-sm italic opacity-80">• {readingTime}</span>
-    </div>
-    <div class="flex gap-4 items-start">
-      {showImage && heroImage && (
-        <a 
-          href={getPath(id, filePath)}
-          class="flex-shrink-0 hidden sm:block group"
+<article class:list={[
+  "newspaper-card group",
+  {
+    "newspaper-card--lead": size === "lead",
+    "newspaper-card--compact": size === "compact",
+  },
+]}>
+  {primaryTag && (
+    <span class="section-label mb-1 block">{primaryTag}</span>
+  )}
+
+  <a
+    href={getPath(id, filePath)}
+    class="block"
+  >
+    {
+      variant === "h2" ? (
+        <h2
+          style={{ viewTransitionName: slugifyStr(title) }}
+          class:list={[
+            "font-headline text-foreground hover:text-accent transition-colors duration-150",
+            size === "lead" ? "text-2xl sm:text-3xl md:text-4xl" : size === "compact" ? "text-base sm:text-lg" : "text-xl sm:text-2xl",
+          ]}
         >
-          <Image
-            src={heroImage}
-            alt={title}
-            width={140}
-            height={79}
-            class="rounded shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:scale-105 object-cover"
-            format="webp"
-            quality={80}
-            loading="lazy"
-            densities={[1, 2]}
-          />
-        </a>
-      )}
-      <p class="flex-1 opacity-80 text-pretty">{description}</p>
-    </div>
+          {title}
+        </h2>
+      ) : (
+        <h3
+          style={{ viewTransitionName: slugifyStr(title) }}
+          class:list={[
+            "font-headline text-foreground hover:text-accent transition-colors duration-150",
+            size === "lead" ? "text-2xl sm:text-3xl md:text-4xl" : size === "compact" ? "text-base sm:text-lg" : "text-xl sm:text-2xl",
+          ]}
+        >
+          {title}
+        </h3>
+      )
+    }
+  </a>
+
+  {size !== "compact" && (
+    <p class:list={[
+      "font-serif text-foreground/80 mt-2",
+      size === "lead" ? "text-lg italic leading-relaxed" : "text-base leading-relaxed",
+    ]}>
+      {description}
+    </p>
+  )}
+
+  <div class="mt-2 flex items-center gap-2 font-sans-ui text-xs text-meta uppercase tracking-wide">
+    <time datetime={dayjs(pubDatetime).toISOString()}>{date}</time>
+    {readingTime && (
+      <>
+        <span class="text-border">·</span>
+        <span>{readingTime}</span>
+      </>
+    )}
   </div>
-</li>
+</article>

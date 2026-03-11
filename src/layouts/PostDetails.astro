@@ -3,7 +3,6 @@ import { type CollectionEntry, render } from "astro:content";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import BackButton from "@/components/BackButton.astro";
-import Datetime from "@/components/Datetime.astro";
 import EditPost from "@/components/EditPost.astro";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
@@ -15,6 +14,7 @@ import Layout from "@/layouts/Layout.astro";
 import { getPath } from "@/utils/getPath";
 import { calculateReadingTime } from "@/utils/readingTime";
 import { slugifyStr } from "@/utils/slugify";
+import dayjs from "dayjs";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -41,23 +41,16 @@ const { Content } = await render(post);
 const readingTime = calculateReadingTime(post.body ?? "");
 
 let ogImageUrl: string | undefined;
-
-// Determine OG image source
 if (typeof initOgImage === "string") {
-  ogImageUrl = initOgImage; // Remote OG image (absolute URL)
+  ogImageUrl = initOgImage;
 } else if (initOgImage?.src) {
-  ogImageUrl = initOgImage.src; // Local asset
+  ogImageUrl = initOgImage.src;
 }
-
-// Use dynamic OG image if enabled and no remote|local ogImage
 if (!ogImageUrl && SITE.dynamicOgImage) {
   ogImageUrl = `${getPath(post.id, post.filePath)}/index.png`;
 }
-
-// Resolve OG image URL (or fallback to SITE.ogImage / default `og.png`)
 const ogImage = ogImageUrl ? new URL(ogImageUrl, Astro.url.origin).href : undefined;
 
-// Generate the canonical URL - always use the full path with year
 const postPath = getPath(post.id, post.filePath, true);
 const computedCanonicalURL =
   canonicalURL ||
@@ -75,24 +68,24 @@ const layoutProps = {
 };
 
 /* ========== Prev/Next Posts ========== */
-
 const allPosts = posts.map(({ data: { title }, id }) => ({
   slug: id,
   title,
 }));
-
 const currentPostIndex = allPosts.findIndex((a) => a.slug === post.id);
-
 const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
 const nextPost = currentPostIndex !== allPosts.length ? allPosts[currentPostIndex + 1] : null;
 
-// Calculate word count for structured data
 const wordCount = (post.body ?? "").split(/\s+/).length;
+
+const date = dayjs(pubDatetime).format("D MMMM YYYY");
+const modDate = modDatetime ? dayjs(modDatetime).format("D MMMM YYYY") : null;
+const primaryTag = tags?.[0];
 ---
 
 <Layout {...layoutProps}>
-  <StructuredData 
-    type="BlogPosting" 
+  <StructuredData
+    type="BlogPosting"
     data={{
       title,
       description,
@@ -104,7 +97,7 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
       tags,
       wordCount,
       readingTime
-    }} 
+    }}
   />
   <Header />
   <BackButton />
@@ -112,37 +105,54 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
     id="main-content"
     class:list={[
       "mx-auto w-full max-w-3xl px-4 pb-12",
-      { "mt-8": !SITE.showBackButton },
+      { "mt-6": !SITE.showBackButton },
     ]}
     data-pagefind-body
   >
-    <h1
-      transition:name={slugifyStr(title)}
-      class="inline-block text-2xl font-bold text-accent sm:text-3xl"
-    >
-      {title}
-    </h1>
-    <div class="mt-2 mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex flex-wrap items-center gap-3">
-        <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
-        {
-          readingTime && (
-            <>
-              <span class="text-foreground/30">•</span>
-              <span class="text-sm text-foreground/60">{readingTime}</span>
-            </>
-          )
-        }
+    <!-- Article header -->
+    <header class="mb-8 text-center">
+      {primaryTag && (
+        <span class="section-label mb-3 block">{primaryTag}</span>
+      )}
+      <h1
+        transition:name={slugifyStr(title)}
+        class="font-headline text-3xl sm:text-4xl md:text-5xl text-foreground leading-tight"
+      >
+        {title}
+      </h1>
+      {description && (
+        <p class="mt-4 font-serif text-lg italic text-meta leading-relaxed max-w-2xl mx-auto">
+          {description}
+        </p>
+      )}
+      <div class="mt-4 flex items-center justify-center gap-3 font-sans-ui text-xs uppercase tracking-widest text-meta">
+        <span>{SITE.author}</span>
+        <span class="text-border">·</span>
+        <time datetime={dayjs(pubDatetime).toISOString()}>{date}</time>
+        {readingTime && (
+          <>
+            <span class="text-border">·</span>
+            <span>{readingTime}</span>
+          </>
+        )}
       </div>
-      <EditPost class="max-sm:hidden" {hideEditPost} {post} />
-    </div>
-    <article id="article" class="mx-auto prose mt-6 max-w-3xl">
+      {modDate && (
+        <p class="mt-1 font-sans-ui text-xs text-meta/60">
+          Updated {modDate}
+        </p>
+      )}
+    </header>
+
+    <div class="rule-thin mb-8"></div>
+
+    <!-- Article body -->
+    <article id="article" class="prose mx-auto max-w-3xl">
       {
         heroImage && (
           <img
             src={heroImage}
             alt=""
-            class="mb-8 aspect-video w-full rounded-md object-cover"
+            class="mb-8 aspect-video w-full object-cover"
             loading="lazy"
           />
         )
@@ -150,11 +160,12 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
       <Content />
     </article>
 
-    <hr class="my-8 border-dashed" />
+    <div class="rule-thin my-8"></div>
 
+    <EditPost class="max-sm:hidden" {hideEditPost} {post} />
     <EditPost class="sm:hidden" {hideEditPost} {post} />
 
-    <ul class="mt-4 mb-8 sm:my-8">
+    <ul class="mt-4 mb-8 flex flex-wrap gap-2 sm:my-8">
       {tags.map((tag) => <Tag tag={slugifyStr(tag)} tagName={tag} />)}
     </ul>
 
@@ -162,21 +173,20 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
       class="flex flex-col items-center justify-between gap-6 sm:flex-row sm:items-end sm:gap-4"
     >
       <ShareLinks />
-
       <button
         id="back-to-top"
-        class="focus-outline min-h-11 whitespace-nowrap rounded-sm px-3 py-2 hover:opacity-75"
+        class="focus-outline min-h-11 whitespace-nowrap rounded-sm px-3 py-2 font-sans-ui text-sm text-meta hover:text-accent"
       >
         <IconChevronLeft class="inline-block rotate-90" />
         <span>Back to Top</span>
       </button>
     </div>
 
-    <hr class="my-6 border-dashed" />
+    <div class="rule-thin my-6"></div>
 
-    <!-- Previous/Next Post Buttons -->
-    <div 
-      data-pagefind-ignore 
+    <!-- Previous/Next Post Navigation -->
+    <div
+      data-pagefind-ignore
       class="flex flex-col sm:flex-row justify-between gap-6"
       data-prev-url={prevPost ? `/posts/${prevPost.slug}` : ''}
       data-next-url={nextPost ? `/posts/${nextPost.slug}` : ''}
@@ -185,13 +195,13 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
         prevPost && (
           <a
             href={`/posts/${prevPost.slug}`}
-            class="flex items-start gap-2 hover:opacity-75"
+            class="flex items-start gap-2 hover:text-accent transition-colors group"
             id="prev-post-link"
           >
             <IconChevronLeft class="inline-block flex-shrink-0 mt-0.5" />
             <div class="min-w-0 break-words">
-              <span class="block text-sm text-foreground/70">Previous Post</span>
-              <div class="text-accent/85">{prevPost.title}</div>
+              <span class="block font-sans-ui text-xs uppercase tracking-widest text-meta">Previous</span>
+              <div class="font-headline text-base text-foreground group-hover:text-accent transition-colors">{prevPost.title}</div>
             </div>
           </a>
         )
@@ -200,12 +210,12 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
         nextPost && (
           <a
             href={`/posts/${nextPost.slug}`}
-            class="ml-auto flex items-start justify-end gap-2 text-right hover:opacity-75"
+            class="ml-auto flex items-start justify-end gap-2 text-right hover:text-accent transition-colors group"
             id="next-post-link"
           >
             <div class="min-w-0 break-words">
-              <span class="block text-sm text-foreground/70">Next Post</span>
-              <div class="text-accent/85">{nextPost.title}</div>
+              <span class="block font-sans-ui text-xs uppercase tracking-widest text-meta">Next</span>
+              <div class="font-headline text-base text-foreground group-hover:text-accent transition-colors">{nextPost.title}</div>
             </div>
             <IconChevronRight class="inline-block flex-shrink-0 mt-0.5" />
           </a>
@@ -217,29 +227,22 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
 </Layout>
 
 <script is:inline data-astro-rerun>
-  /** Create a progress indicator
-   *  at the top */
+  /** Create a progress indicator at the top */
   function createProgressBar() {
-    // Create the main container div
     const progressContainer = document.createElement("div");
     progressContainer.className =
-      "progress-container fixed top-0 z-10 h-1 w-full bg-background";
+      "progress-container fixed top-0 z-10 h-0.5 w-full bg-background";
 
-    // Create the progress bar div
     const progressBar = document.createElement("div");
-    progressBar.className = "progress-bar h-1 w-0 bg-accent";
+    progressBar.className = "progress-bar h-0.5 w-0 bg-accent";
     progressBar.id = "myBar";
 
-    // Append the progress bar to the progress container
     progressContainer.appendChild(progressBar);
-
-    // Append the progress container to the document body or any other desired parent element
     document.body.appendChild(progressContainer);
   }
   createProgressBar();
 
-  /** Update the progress bar
-   *  when user scrolls */
+  /** Update the progress bar when user scrolls */
   function updateScrollProgress() {
     document.addEventListener("scroll", () => {
       const winScroll =
@@ -258,8 +261,7 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
   }
   updateScrollProgress();
 
-  /** Attaches links to headings in the document,
-   *  allowing sharing of sections easily */
+  /** Attaches links to headings in the document */
   function addHeadingLinks() {
     const headings = Array.from(
       document.querySelectorAll("h2, h3, h4, h5, h6"),
@@ -280,8 +282,7 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
   }
   addHeadingLinks();
 
-  /** Attaches copy buttons to code blocks in the document,
-   * allowing users to copy code easily. */
+  /** Attaches copy buttons to code blocks */
   function attachCopyButtons() {
     const copyButtonLabel = "Copy";
     const codeBlocks = Array.from(document.querySelectorAll("pre"));
@@ -297,7 +298,6 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
       codeBlock.setAttribute("tabindex", "0");
       codeBlock.appendChild(copyButton);
 
-      // wrap codebock with relative parent element
       codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
       wrapper.appendChild(codeBlock);
 
@@ -312,7 +312,6 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
 
       await navigator.clipboard.writeText(text ?? "");
 
-      // visual feedback that task is completed
       button.innerText = "Copied";
 
       setTimeout(() => {
@@ -322,12 +321,11 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
   }
   attachCopyButtons();
 
-  /** Scrolls the document to the top when
-   * the "Back to Top" button is clicked. */
+  /** Scrolls the document to the top */
   function backToTop() {
     document.querySelector("#back-to-top")?.addEventListener("click", () => {
-      document.body.scrollTop = 0; // For Safari
-      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
     });
   }
   backToTop();
@@ -341,7 +339,7 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
   function addLazyLoading() {
     const article = document.querySelector("#article");
     if (!article) return;
-    
+
     const images = article.querySelectorAll("img:not([loading])");
     images.forEach((img) => {
       img.setAttribute("loading", "lazy");
@@ -353,19 +351,16 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
   function setupKeyboardNavigation() {
     const navContainer = document.querySelector('[data-prev-url]');
     if (!navContainer) return;
-    
+
     const prevUrl = navContainer.getAttribute('data-prev-url');
     const nextUrl = navContainer.getAttribute('data-next-url');
-    
+
     document.addEventListener('keydown', (e) => {
-      // Ignore if user is typing in an input, textarea, or contenteditable
       if (e.target.matches('input, textarea, [contenteditable="true"]')) return;
-      
-      // J key for next post
+
       if (e.key === 'j' && nextUrl) {
         window.location.href = nextUrl;
       }
-      // K key for previous post
       else if (e.key === 'k' && prevUrl) {
         window.location.href = prevUrl;
       }
@@ -378,12 +373,10 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
     const article = document.querySelector("#article");
     if (!article) return;
 
-    // Look for YouTube embeds
     const youtubeEmbedRegex = /\{% youtube (https:\/\/[^\s]+|[a-zA-Z0-9_-]+) %\}/g;
-    
+
     let foundYoutubeEmbeds = false;
-    
-    // Helper to extract a YouTube video ID from various URL formats
+
     const extractYouTubeId = (input) => {
       let videoId = input;
       try {
@@ -396,12 +389,10 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
           videoId = videoId.split("youtube.com/embed/")[1]?.split("?")[0] || "";
         }
       } catch (_) {
-        // If URL parsing fails, fall back to the raw input
       }
       return videoId;
     };
 
-    // 1) Pre-pass: replace whole-paragraph shortcodes (most common case)
     const pNodes = article.querySelectorAll("p");
     pNodes.forEach((p) => {
       const text = (p.textContent || "").trim();
@@ -427,7 +418,6 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
       }
     });
 
-    // 2) Fallback: process any remaining text nodes that still contain shortcodes
     const walker = document.createTreeWalker(
       article,
       NodeFilter.SHOW_TEXT,
@@ -445,7 +435,6 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
       let content = textNode.textContent;
       let hasChanges = false;
 
-      // Process YouTube embeds
       content = content.replace(youtubeEmbedRegex, (match, videoId) => {
         foundYoutubeEmbeds = true;
         hasChanges = true;
@@ -465,11 +454,9 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
       });
 
       if (hasChanges) {
-        // Replace the text node with HTML content
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = content;
 
-        // Replace the text node with the new HTML elements
         const parent = textNode.parentNode;
         while (tempDiv.firstChild) {
           parent.insertBefore(tempDiv.firstChild, textNode);
@@ -479,10 +466,7 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
     });
   }
 
-  // Run the embed processing
   processEmbeds();
-  
-  // Also run after astro navigation
   document.addEventListener("astro:page-load", processEmbeds);
 </script>
 
@@ -491,7 +475,7 @@ const wordCount = (post.body ?? "").split(/\s+/).length;
     margin: 2rem 0;
     position: relative;
     width: 100%;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    padding-bottom: 56.25%;
     height: 0;
     overflow: hidden;
   }

@@ -1,129 +1,35 @@
 ---
 import { getCollection } from "astro:content";
-import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
-import IconRss from "@/assets/icons/IconRss.svg";
-import Card from "@/components/Card.astro";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
-import Hr from "@/components/Hr.astro";
-import LinkButton from "@/components/LinkButton.astro";
-import Socials from "@/components/Socials.astro";
-import StructuredData from "@/components/StructuredData.astro";
-import { SITE, SOCIALS } from "@/config";
+import { SITE } from "@/config";
 import Layout from "@/layouts/Layout.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
+import { getPath } from "@/utils/getPath";
+import dayjs from "dayjs";
 
 const posts = await getCollection("blog");
-
 const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 ---
 
-<Layout
-  description="Personal blog about software, systems, and what I am learning."
->
-  <StructuredData type="WebSite" data={{}} />
-  <StructuredData type="Person" data={{}} />
+<Layout description={SITE.desc}>
   <Header />
-  <main id="main-content" data-layout="index">
-    <section id="hero" class="pt-6 pb-4">
-      <div class="flex flex-col sm:flex-row items-start gap-4">
-        <a href="/about" class="block mx-auto sm:mx-0 group">
-          <img
-            src="/anders-avatar.jpeg"
-            alt={SITE.author}
-            class="w-40 h-40 rounded-full object-cover shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl"
-          />
-        </a>
-        <div class="flex-1 text-center sm:text-left">
-          <div class="flex items-center gap-2 justify-center sm:justify-start">
-            <h1
-              class="my-2 inline-block text-2xl font-bold sm:my-4 sm:text-3xl"
-            >
-              Hi, I am {SITE.author}.
-            </h1>
-            <a
-              target="_blank"
-              href="/rss.xml"
-              class="inline-block"
-              aria-label="rss feed"
-              title="RSS Feed"
-            >
-              <IconRss
-                width={20}
-                height={20}
-                class="scale-125 stroke-accent stroke-3"
-              />
-              <span class="sr-only">RSS Feed</span>
+  <main id="main-content" class="mx-auto w-full max-w-3xl px-4 pb-8">
+    <ul class="mt-2">
+      {sortedPosts.map((post) => {
+        const date = dayjs(post.data.pubDatetime).format("YYYY-MM-DD");
+        return (
+          <li class="flex gap-4 py-1.5 text-sm">
+            <time datetime={post.data.pubDatetime.toISOString()} class="shrink-0 tabular-nums text-foreground/50">
+              {date}
+            </time>
+            <a href={getPath(post.id, post.filePath)} class="truncate">
+              {post.data.title}
             </a>
-          </div>
-          <p>
-            Personal blog about things I am doing, building or learning about.<br
-            />
-            Just exploring.
-          </p>
-          {
-            // only display if at least one social link is enabled
-            SOCIALS.filter((social) => social.active).length > 0 && (
-              <div class="mt-4 flex flex-row items-center justify-center sm:justify-start">
-                <Socials />
-              </div>
-            )
-          }
-        </div>
-      </div>
-    </section>
-
-    <Hr />
-
-    {
-      featuredPosts.length > 0 && (
-        <>
-          <section id="featured" class="pt-12 pb-6">
-            <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
-            <ul>
-              {featuredPosts.map((data) => (
-                <Card variant="h3" {...data} showImage={false} />
-              ))}
-            </ul>
-          </section>
-          {recentPosts.length > 0 && <Hr />}
-        </>
-      )
-    }
-
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <ul>
-            {recentPosts.map(
-              (data, index) =>
-                index < SITE.postPerIndex && (
-                  <Card variant="h3" {...data} showImage={false} />
-                ),
-            )}
-          </ul>
-        </section>
-      )
-    }
-
-    <div class="my-8 text-center">
-      <LinkButton href="/posts/">
-        All Posts
-        <IconArrowRight class="inline-block" />
-      </LinkButton>
-    </div>
+          </li>
+        );
+      })}
+    </ul>
   </main>
   <Footer />
 </Layout>
-
-<script>
-  document.addEventListener("astro:page-load", () => {
-    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-      ?.dataset?.layout;
-    if (indexLayout) {
-      sessionStorage.setItem("backUrl", "/");
-    }
-  });
-</script>

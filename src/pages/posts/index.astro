@@ -1,81 +1,36 @@
 ---
 import { getCollection } from "astro:content";
-import Card from "@/components/Card.astro";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import { SITE } from "@/consts";
 import Layout from "@/layouts/Layout.astro";
-import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
+import getSortedPosts from "@/utils/getSortedPosts";
+import { getPath } from "@/utils/getPath";
+import dayjs from "dayjs";
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
-
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+const sortedPosts = getSortedPosts(posts);
 ---
 
-<Layout title={`Posts | ${SITE.title}`} description="Archive of all blog posts.">
+<Layout title={`Posts | ${SITE.title}`} description="All blog posts.">
   <Header />
-  <main id="main-content" class="mx-auto w-full max-w-3xl px-4 pb-4">
-    <h1 class="text-2xl font-semibold sm:text-3xl mt-8">All Posts</h1>
-    <p class="mt-2 mb-6 italic">Browse all blog posts by year and month</p>
-    {
-      Object.entries(
-        getPostsByGroupCondition(posts, (post) => {
-          const pubDate = post.data.pubDatetime || new Date();
-          return new Date(pubDate).getFullYear();
-        }),
-      )
-        .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
-        .map(([year, yearGroup]) => (
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-6 border-b border-accent pb-2">
-              {year}
-              <sup class="text-sm ml-1">{yearGroup.length}</sup>
-            </h2>
-            {Object.entries(
-              getPostsByGroupCondition(yearGroup, (post) => {
-                const pubDate = post.data.pubDatetime || new Date();
-                return new Date(pubDate).getMonth() + 1;
-              }),
-            )
-              .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
-              .map(([month, monthGroup]) => (
-                <div class="mt-8">
-                  <h3 class="text-xl font-bold mb-4">
-                    {months[Number(month) - 1]}
-                    <sup class="text-sm ml-1">{monthGroup.length}</sup>
-                  </h3>
-                  <ul>
-                    {monthGroup
-                      .sort((a, b) => {
-                        const aDate = a.data.pubDatetime || new Date();
-                        const bDate = b.data.pubDatetime || new Date();
-                        return (
-                          Math.floor(new Date(bDate).getTime() / 1000) -
-                          Math.floor(new Date(aDate).getTime() / 1000)
-                        );
-                      })
-                      .map((data) => (
-                        <Card {...data} />
-                      ))}
-                  </ul>
-                </div>
-              ))}
-          </div>
-        ))
-    }
+  <main id="main-content" class="mx-auto w-full max-w-3xl px-4 pb-8">
+    <h1 class="text-xl font-bold mt-4 mb-4">Posts</h1>
+    <ul>
+      {sortedPosts.map((post) => {
+        const date = dayjs(post.data.pubDatetime).format("YYYY-MM-DD");
+        return (
+          <li class="flex gap-4 py-1.5 text-sm">
+            <time datetime={post.data.pubDatetime.toISOString()} class="shrink-0 tabular-nums text-foreground/50">
+              {date}
+            </time>
+            <a href={getPath(post.id, post.filePath)} class="truncate">
+              {post.data.title}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
   </main>
   <Footer />
 </Layout>

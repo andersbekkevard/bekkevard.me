@@ -1,26 +1,16 @@
 ---
-import Hr from "./Hr.astro";
-import Socials from "./Socials.astro";
-import { SITE } from "@/config";
-
 export interface Props {
   noMarginTop?: boolean;
 }
 
 const { noMarginTop = false } = Astro.props;
-const sourceRepo = SITE.editPost.url.replace(/\/edit\/main\/?$/, "");
 ---
 
-<footer class:list={["w-full", { "mt-auto": !noMarginTop }]}>
-  <Hr noPadding />
-  <div
-    class="flex flex-col items-center justify-between py-6 sm:flex-row-reverse sm:py-4"
-  >
-    <Socials centered />
-    <div class="my-2 flex flex-col items-center text-center sm:flex-row">
-      <a href={sourceRepo} target="_blank" rel="noopener noreferrer" class="hover:text-accent">
-        Source available · Content CC BY 4.0 · Code MIT
-      </a>
-    </div>
+<footer class:list={["mx-auto w-full max-w-3xl px-4 py-8 text-sm text-foreground/50", { "mt-auto": !noMarginTop }]}>
+  <hr class="mb-4 border-border" />
+  <div class="flex flex-wrap gap-x-4 gap-y-1">
+    <a href="https://github.com/andersbekkevard" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://www.linkedin.com/in/andersbekkevard/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <a href="/rss.xml">RSS</a>
   </div>
 </footer>

@@ -120,6 +120,13 @@ html[data-theme="dark"] {
 
 /* ── Newspaper typography helpers ── */
 
+.font-masthead {
+  font-family: "Barlow Semi Condensed", "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+}
+
 .font-headline {
   font-family: "Barlow Condensed", "Arial Narrow", "Helvetica Neue Condensed", sans-serif;
   font-weight: 700;

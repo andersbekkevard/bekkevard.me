@@ -112,7 +112,7 @@ export default defineConfig({
         name: "Anders Bekkevard",
         short_name: "bekkevard",
         description: "Personal blog, doodling on my learnings",
-        theme_color: "#006cac",
+        theme_color: "#fdfdfd",
         background_color: "#fdfdfd",
         display: "standalone",
         orientation: "portrait",

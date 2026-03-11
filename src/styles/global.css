@@ -23,18 +23,18 @@
 :root,
 html[data-theme="light"] {
   --background: #fdfdfd;
-  --foreground: #282728;
+  --foreground: #1f2937;
   --accent: #006cac;
-  --muted: #e6e6e6;
-  --border: #ece9e9;
+  --muted: #eef3f8;
+  --border: #d5e1ee;
 }
 
 html[data-theme="dark"] {
-  --background: #212737;
-  --foreground: #eaedf3;
-  --accent: #ff6b01;
-  --muted: #343f60bf;
-  --border: #ab4b08;
+  --background: #162235;
+  --foreground: #edf3f8;
+  --accent: #79b8f3;
+  --muted: #223149;
+  --border: #32506f;
 }
 
 @theme {

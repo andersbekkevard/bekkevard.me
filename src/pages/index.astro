@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconRss from "@/assets/icons/IconRss.svg";
-import Card from "@/components/Card.astro";
+import Datetime from "@/components/Datetime.astro";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import Hr from "@/components/Hr.astro";
@@ -12,12 +12,28 @@ import StructuredData from "@/components/StructuredData.astro";
 import { SITE, SOCIALS } from "@/config";
 import Layout from "@/layouts/Layout.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
+import { getPath } from "@/utils/getPath";
+import { calculateReadingTime } from "@/utils/readingTime";
+import { slugifyStr } from "@/utils/slugify";
 
 const posts = await getCollection("blog");
 
 const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+const leadPost = sortedPosts.find(({ data }) => data.featured) ?? sortedPosts[0];
+const supportingPosts = sortedPosts
+  .filter(({ id }) => id !== leadPost?.id)
+  .slice(0, 3);
+const recentPosts = sortedPosts
+  .filter(({ id }) => id !== leadPost?.id)
+  .slice(0, SITE.postPerIndex);
+const topics = Array.from(
+  new Map(
+    sortedPosts
+      .flatMap(({ data }) => data.tags ?? [])
+      .map((tag) => [slugifyStr(tag), { label: tag, slug: slugifyStr(tag) }]),
+  ).values(),
+).slice(0, 6);
+const leadReadingTime = leadPost ? calculateReadingTime(leadPost.body ?? "") : "";
 ---
 
 <Layout
@@ -27,47 +43,100 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
   <StructuredData type="Person" data={{}} />
   <Header />
   <main id="main-content" data-layout="index">
-    <section id="hero" class="pt-6 pb-4">
-      <div class="flex flex-col sm:flex-row items-start gap-4">
-        <a href="/about" class="block mx-auto sm:mx-0 group">
-          <img
-            src="/anders-avatar.jpeg"
-            alt={SITE.author}
-            class="w-40 h-40 rounded-full object-cover shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl"
-          />
-        </a>
-        <div class="flex-1 text-center sm:text-left">
-          <div class="flex items-center gap-2 justify-center sm:justify-start">
-            <h1
-              class="my-2 inline-block text-2xl font-bold sm:my-4 sm:text-3xl"
-            >
-              Hi, I am {SITE.author}.
-            </h1>
-            <a
-              target="_blank"
-              href="/rss.xml"
-              class="inline-block"
-              aria-label="rss feed"
-              title="RSS Feed"
-            >
-              <IconRss
-                width={20}
-                height={20}
-                class="scale-125 stroke-accent stroke-3"
-              />
-              <span class="sr-only">RSS Feed</span>
-            </a>
+    <section id="hero" class="pt-8 pb-6">
+      <div class="rounded-[2rem] border border-border bg-muted/35 px-6 py-8 sm:px-8 sm:py-10">
+        <div class="flex flex-col gap-8">
+          <div class="flex flex-wrap items-center gap-3 text-sm uppercase tracking-[0.24em] text-accent/80">
+            <span class="rounded-full border border-accent/20 bg-background px-3 py-1">
+              Independent writing
+            </span>
+            <span>{sortedPosts.length} posts</span>
+            <span>{topics.length} topics</span>
           </div>
-          <p>
-            Personal blog about things I am doing, building or learning about.<br
-            />
-            Just exploring.
-          </p>
+
+          <div class="grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(16rem,1fr)] lg:items-end">
+            <div class="max-w-3xl">
+              <h1 class="max-w-2xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                Essays on software, systems, and building with care.
+              </h1>
+              <p class="mt-4 max-w-2xl text-base leading-7 text-foreground/75 sm:text-lg">
+                {SITE.desc} A quieter, more editorial front page: featured writing first, clear topics second, and the archive always close.
+              </p>
+
+              <div class="mt-6 flex flex-wrap items-center gap-3">
+                <LinkButton
+                  href={leadPost ? getPath(leadPost.id, leadPost.filePath) : "/posts"}
+                  class="rounded-full bg-accent px-5 py-3 text-sm font-medium text-background transition hover:bg-accent/90 hover:text-background"
+                >
+                  Read featured
+                </LinkButton>
+                <LinkButton
+                  href="/posts"
+                  class="rounded-full border border-border px-5 py-3 text-sm font-medium"
+                >
+                  Browse all posts
+                </LinkButton>
+                <LinkButton
+                  href="/about"
+                  class="rounded-full border border-border px-5 py-3 text-sm font-medium"
+                >
+                  About Anders
+                </LinkButton>
+                <a
+                  target="_blank"
+                  href="/rss.xml"
+                  class="inline-flex size-11 items-center justify-center rounded-full border border-border"
+                  aria-label="rss feed"
+                  title="RSS Feed"
+                >
+                  <IconRss
+                    width={20}
+                    height={20}
+                    class="scale-125 stroke-accent stroke-3"
+                  />
+                  <span class="sr-only">RSS Feed</span>
+                </a>
+              </div>
+
+              {
+                SOCIALS.filter((social) => social.active).length > 0 && (
+                  <div class="mt-6 flex flex-row items-center justify-start">
+                    <Socials />
+                  </div>
+                )
+              }
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              <div class="rounded-2xl border border-border bg-background px-4 py-4">
+                <div class="text-xs uppercase tracking-[0.2em] text-foreground/55">Writing</div>
+                <div class="mt-2 text-2xl font-semibold">{sortedPosts.length}</div>
+                <p class="mt-1 text-sm text-foreground/70">Long-form notes, essays, and working documents.</p>
+              </div>
+              <div class="rounded-2xl border border-border bg-background px-4 py-4">
+                <div class="text-xs uppercase tracking-[0.2em] text-foreground/55">Topics</div>
+                <div class="mt-2 text-2xl font-semibold">{topics.length}</div>
+                <p class="mt-1 text-sm text-foreground/70">Software, learning, focus, and adjacent systems work.</p>
+              </div>
+              <div class="rounded-2xl border border-border bg-background px-4 py-4">
+                <div class="text-xs uppercase tracking-[0.2em] text-foreground/55">Format</div>
+                <div class="mt-2 text-2xl font-semibold">Blog</div>
+                <p class="mt-1 text-sm text-foreground/70">Maven-like front-page rhythm, translated into an article archive.</p>
+              </div>
+            </div>
+          </div>
+
           {
-            // only display if at least one social link is enabled
-            SOCIALS.filter((social) => social.active).length > 0 && (
-              <div class="mt-4 flex flex-row items-center justify-center sm:justify-start">
-                <Socials />
+            topics.length > 0 && (
+              <div class="flex flex-wrap gap-2">
+                {topics.map((topic) => (
+                  <a
+                    href={`/tags/${topic.slug}`}
+                    class="rounded-full border border-border bg-background px-3 py-2 text-sm text-foreground/75 transition hover:border-accent/35 hover:text-accent"
+                  >
+                    {topic.label}
+                  </a>
+                ))}
               </div>
             )
           }
@@ -78,42 +147,127 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
     <Hr />
 
     {
-      featuredPosts.length > 0 && (
-        <>
-          <section id="featured" class="pt-12 pb-6">
-            <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
-            <ul>
-              {featuredPosts.map((data) => (
-                <Card variant="h3" {...data} showImage={false} />
-              ))}
-            </ul>
-          </section>
-          {recentPosts.length > 0 && <Hr />}
-        </>
-      )
-    }
+      leadPost && (
+        <section id="featured" class="pt-12 pb-8">
+          <div class="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.24em] text-accent/80">Featured essay</p>
+              <h2 class="mt-2 text-3xl font-semibold tracking-tight">Start here</h2>
+            </div>
+            <LinkButton href="/posts" class="text-sm font-medium">
+              See archive <IconArrowRight class="inline-block" />
+            </LinkButton>
+          </div>
 
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <ul>
-            {recentPosts.map(
-              (data, index) =>
-                index < SITE.postPerIndex && (
-                  <Card variant="h3" {...data} showImage={false} />
-                ),
-            )}
-          </ul>
+          <div class="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <article class="rounded-[2rem] border border-border bg-background px-6 py-6 sm:px-8 sm:py-8">
+              <p class="text-sm uppercase tracking-[0.22em] text-accent/75">Featured</p>
+              <a href={getPath(leadPost.id, leadPost.filePath)} class="mt-3 block">
+                <h3 class="max-w-2xl text-3xl font-semibold tracking-tight text-accent sm:text-4xl">
+                  {leadPost.data.title}
+                </h3>
+              </a>
+              <p class="mt-4 max-w-2xl text-base leading-7 text-foreground/75">
+                {leadPost.data.description}
+              </p>
+              <div class="mt-6 flex flex-wrap items-center gap-4">
+                <Datetime
+                  pubDatetime={leadPost.data.pubDatetime}
+                  modDatetime={leadPost.data.modDatetime}
+                  timezone={leadPost.data.timezone}
+                />
+                <span class="text-sm italic opacity-80">• {leadReadingTime}</span>
+              </div>
+              {
+                leadPost.data.tags && leadPost.data.tags.length > 0 && (
+                  <div class="mt-6 flex flex-wrap gap-2">
+                    {leadPost.data.tags.slice(0, 4).map((tag) => (
+                      <a
+                        href={`/tags/${slugifyStr(tag)}`}
+                        class="rounded-full bg-muted px-3 py-1.5 text-sm text-foreground/70 transition hover:text-accent"
+                      >
+                        {tag}
+                      </a>
+                    ))}
+                  </div>
+                )
+              }
+            </article>
+
+            <div class="grid gap-4">
+              {supportingPosts.map((post) => (
+                <article class="rounded-[1.5rem] border border-border bg-background px-5 py-5">
+                  <p class="text-xs uppercase tracking-[0.2em] text-foreground/55">From the archive</p>
+                  <a href={getPath(post.id, post.filePath)} class="mt-2 block">
+                    <h3 class="text-xl font-semibold tracking-tight text-accent">
+                      {post.data.title}
+                    </h3>
+                  </a>
+                  <p class="mt-2 text-sm leading-6 text-foreground/70">
+                    {post.data.description}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
         </section>
       )
     }
 
-    <div class="my-8 text-center">
-      <LinkButton href="/posts/">
-        All Posts
-        <IconArrowRight class="inline-block" />
-      </LinkButton>
-    </div>
+    <Hr />
+
+    {
+      recentPosts.length > 0 && (
+        <section id="recent-posts" class="pt-12 pb-10">
+          <div class="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.24em] text-accent/80">Latest writing</p>
+              <h2 class="mt-2 text-3xl font-semibold tracking-tight">Recent posts</h2>
+            </div>
+            <LinkButton href="/posts/" class="text-sm font-medium">
+              All posts <IconArrowRight class="inline-block" />
+            </LinkButton>
+          </div>
+          <ul class="grid gap-4 md:grid-cols-2">
+            {recentPosts.map((post) => (
+              <li>
+                <article class="flex h-full flex-col rounded-[1.5rem] border border-border bg-background px-5 py-5">
+                  <div class="flex items-center justify-between gap-3">
+                    <p class="text-xs uppercase tracking-[0.2em] text-foreground/55">
+                      {post.data.tags?.[0] ?? "Essay"}
+                    </p>
+                    <span class="text-sm italic text-foreground/60">
+                      {calculateReadingTime(post.body ?? "")}
+                    </span>
+                  </div>
+                  <a href={getPath(post.id, post.filePath)} class="mt-3 block">
+                    <h3 class="text-2xl font-semibold tracking-tight text-accent">
+                      {post.data.title}
+                    </h3>
+                  </a>
+                  <p class="mt-3 flex-1 text-sm leading-6 text-foreground/72">
+                    {post.data.description}
+                  </p>
+                  <div class="mt-5 flex items-center justify-between gap-3">
+                    <Datetime
+                      pubDatetime={post.data.pubDatetime}
+                      modDatetime={post.data.modDatetime}
+                      timezone={post.data.timezone}
+                    />
+                    <LinkButton
+                      href={getPath(post.id, post.filePath)}
+                      class="text-sm font-medium"
+                    >
+                      Read <IconArrowRight class="inline-block" />
+                    </LinkButton>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
   </main>
   <Footer />
 </Layout>

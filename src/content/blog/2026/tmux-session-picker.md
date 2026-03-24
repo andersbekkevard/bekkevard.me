@@ -6,23 +6,11 @@ author: "Anders Bekkevard"
 tags: ["Tooling", "AI", "tmux"]
 ---
 
-If you run AI coding agents — Claude, Codex, Aider — you quickly end up with a dozen tmux sessions. Each agent gets its own window. Each project gets its own session. You `ctrl-b s` and squint at a flat list of cryptic names, trying to remember which window had the agent that was refactoring auth, and which one was running tests.
+Agent orchestration requires parallelism. tmux is by far the best solution to this.
+However, native tmux sucks, and there must be a better solution. Or so I thought.
 
-This does not scale. When you operate an agent fleet, your terminal multiplexer isn't just a convenience — it's your control plane. And a good control plane needs a good UI.
-
-So I built [tmux-session-picker](https://github.com/andersbekkevard/dotfiles/blob/main/scripts/.scripts/tmux-session-picker): an fzf-powered session and window manager for tmux that makes the whole setup 10x more nimble and *oversiktelig*.
-
-## Why tmux matters for agent work
-
-Every serious agent workflow I've seen converges on the same setup: tmux sessions with multiple windows, each running a different agent or process. You might have:
-
-- A Claude instance working on the backend
-- Another Claude doing frontend
-- A node dev server
-- nvim open for when you need to step in
-- A lazygit window
-
-That's five windows in one session. Multiply by a few projects and you've got 15-20 windows spread across sessions. The built-in tmux session picker (`ctrl-b s`) shows you a flat list with no context. You can't see what each window is actually doing. You can't see the last output. You're flying blind.
+Everything out there was lacking in some aspect. Didn't show preview. Wasn't nimble. Couldn't rename sessions and windows.
+Therefore I have made a new and improved tmux session picker. [tmux-session-picker](https://github.com/andersbekkevard/dotfiles/blob/main/scripts/.scripts/tmux-session-picker)
 
 ## What the picker does
 
@@ -61,43 +49,6 @@ esac
 
 Claude and node processes show up in amber. Shells are blue. Editors are green. You immediately know what's what.
 
-### Smart pane capture
-
-Not all pane content is equally useful. A shell's last 50 empty lines aren't helpful, and an AI agent's toolbar footer is just noise. The preview strips this intelligently per command type:
-
-```bash
-case "$pane_cmd" in
-  claude|codex|aider)
-    # Drop the last 7 lines (agent toolbar/footer)
-    capture="$(tmux capture-pane -p -e -T -t "$pane_id" | drop_last 7)"
-    ;;
-  zsh|bash|sh|fish|dash)
-    # Strip blank lines, show last few meaningful lines
-    capture="$(tmux capture-pane -p -e -T -t "$pane_id" | sed '/^[[:space:]]*$/d' | tail -n 3)"
-    ;;
-  *)
-    capture="$(tmux capture-pane -p -e -T -t "$pane_id")"
-    ;;
-esac
-```
-
-This means when you preview a session, you see the *actual last meaningful output* from each agent — not their chrome.
-
-### Session preview budget allocation
-
-When previewing a session with many windows, the script dynamically allocates vertical space. Shells get 3 lines max (they rarely need more), while agent windows get proportionally more space based on what's available:
-
-```bash
-# Shell captures are already short (3 lines max)
-# Full windows split the remaining budget proportionally
-if (( full_count > 0 )); then
-  base_each=$(( full_budget / full_count ))
-  remainder_lines=$(( full_budget - base_each * full_count ))
-fi
-```
-
-Surplus from windows that have less content than their budget gets redistributed round-robin to others. The result: no wasted space, and the windows with the most output get the most screen real estate.
-
 ### New session with zoxide integration
 
 Ctrl-n opens a name prompt. Press Enter to create at `~/`, or press Tab to open a zoxide-powered path picker with directory previews:
@@ -114,8 +65,6 @@ Rename and kill operations get their own full-screen views with bordered pane ca
 
 ## The bigger picture
 
-The insight is boring but real: when you manage multiple autonomous agents, the bottleneck shifts from *doing the work* to *knowing what's happening*. Your multiplexer becomes mission control. A flat list of session names is like running a control room with unlabeled monitors.
-
-Color-coded commands, live previews, smart content trimming — these aren't fancy features. They're the difference between scanning your fleet in 2 seconds vs. 20. And when each of those agents can go off the rails at any moment, those 18 seconds compound.
+Workflows are changing, and so must the tools. Luckily, building software has never been cheaper. There is so much leverage to be had by just identifying a problem and "clanking" away at it.
 
 The script is [here](https://github.com/andersbekkevard/dotfiles/blob/main/scripts/.scripts/tmux-session-picker). Bind it to a key in your tmux.conf and stop squinting at `ctrl-b s`.

@@ -1,7 +1,7 @@
 ---
 title: "A tmux session picker for managing agent fleets"
 description: "When you run 5+ AI agents in parallel, tmux becomes critical infrastructure. I built a session picker to make the chaos oversiktelig."
-pubDatetime: "2026-03-24T15:00:00+01:00"
+pubDatetime: "2026-03-23T15:00:00+01:00"
 author: "Anders Bekkevard"
 tags: ["Tooling", "AI", "tmux"]
 ---
